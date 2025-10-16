@@ -7,17 +7,39 @@ import { PrismaService } from 'src/prisma.service';
 export class UsersService {
   constructor(private prisma: PrismaService){}
   
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
-  }
-
-  async findAll() {
-    try {
-      const users = await this.prisma.user.findMany()
+  async create(createUserDto: CreateUserDto) {
+    try{
+      const { name, email, password } = createUserDto;
+      const createuser = await this.prisma.user.create({
+        data: {
+          name,
+          email,
+          password
+        }
+      })
       return {
         success: true,
-        message: "user data foundh successfully",
-        data: users
+        message: "user create successfully",
+        data: createuser
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: `Something went wrong: $(error.message)`,
+        data: null
+      }
+    }
+  }
+
+async findAll() {
+    try {
+      const user = await this.prisma.user.findMany({
+      })
+
+      return {
+        success: true,
+        message: "user data found successfully",
+        data: user
       }
     } catch (error) {
       return {
@@ -28,6 +50,8 @@ export class UsersService {
       
     }
   }
+
+
 
   findOne(id: number) {
     return `This action returns a #${id} user`;

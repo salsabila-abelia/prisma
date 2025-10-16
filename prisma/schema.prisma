@@ -13,6 +13,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Kategori {
+  Makanan
+  Minuman
+  Snack
+}
+
 
 //varchar
 model User {
@@ -22,4 +28,52 @@ model User {
   password   String    
   createAt   DateTime  @default(now())
   updateAt   DateTime  @updatedAt
+                                 
+// Relasi
+  transaksi Transaksi[] 
+}
+
+model Menu {
+  id_menu     Int              @id @default(autoincrement())
+  nama        String
+  harga       Decimal          @db.Decimal(10,2)
+  deskripsi   String?
+  kategori    Kategori         @default(Makanan)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  detailTransaksi DetailTransaksi[]
+}
+
+enum Payment {
+  CASH
+  QRIS
+}
+
+model Transaksi {
+  id_transaksi Int              @id @default(autoincrement())
+  id_user      Int
+  tanggal      DateTime         @default(now())
+  total_harga  Decimal          @db.Decimal(10,2)
+  status       String           // Pending, Selesai, Batal
+  paymentMethod Payment         @default(QRIS)     
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  // Relasi
+  user   User?            @relation(fields: [id_user], references: [id])
+  detail DetailTransaksi[]
+}
+
+model DetailTransaksi {
+  id_detail     Int      @id @default(autoincrement())
+  id_transaksi  Int
+  id_menu       Int
+  jumlah        Int
+  subtotal      Decimal  @db.Decimal(10,2)
+  createdAt     DateTime @default(now())
+  updateAt      DateTime @updatedAt
+
+  transaksi Transaksi @relation(fields: [id_transaksi], references: [id_transaksi])
+  menu       Menu      @relation(fields: [id_menu], references: [id_menu])
 }
