@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, Put, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-
+import { RoleGuard, Roles } from 'src/helper/roles-guard';
+import { AuthGuard } from '@nestjs/passport';
+//terminal: npx nest g resource menu
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -14,6 +16,8 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Roles('ADMIN')
   findAll() {
     return this.usersService.findAll();
   }
@@ -23,7 +27,7 @@ export class UsersController {
     return this.usersService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id') //put sama patch itu sma sama untuk mengubah data (tapi klo put mengubah semuanya, walaupun datanya sama, put itu untuk edit edit, kyk email nama dll. klo patch itu hanya mengganti sebagian data saja yg tercantum, jd sesaui permintaan aja, yg lain akan dibiarkan, klo patch lebih baik buat reset password)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
