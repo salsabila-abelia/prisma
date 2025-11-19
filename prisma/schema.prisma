@@ -24,29 +24,29 @@ enum UserRole {
   USER
 }
 
-
 //varchar
 model User {
-  id          Int      @id @default(autoincrement())
-  name       String    
-  email      String    @unique
-  password   String    
-  role       UserRole  @default(USER)
-  createAt   DateTime  @default(now())
-  updateAt   DateTime  @updatedAt
-                                 
-// Relasi
-  transaksi Transaksi[] 
+  id       Int      @id @default(autoincrement())
+  name     String
+  email    String   @unique
+  password String
+  role     UserRole @default(USER)
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  // Relasi
+  transaksi Transaksi[]
 }
 
 model Menu {
-  id_menu     Int              @id @default(autoincrement())
-  nama        String
-  harga       Int          
-  deskripsi   String?
-  kategori    Kategori         @default(Makanan)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id_menu   Int      @id @default(autoincrement())
+  nama      String
+  harga     Int
+  deskripsi String?
+  fileImage String   @default("")
+  kategori  Kategori @default(Makanan)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   detailTransaksi Detail_Transaksi[]
 }
@@ -57,17 +57,17 @@ enum Payment {
 }
 
 model Transaksi {
-  id            Int             @id @default(autoincrement())
-  tanggal       DateTime        @default(now())
-  total         Decimal         @db.Decimal(10,2)
-  paymentMethod Payment         @default(QRIS)   
-  orderName     String          @default("")  
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  User          User?           @relation(fields: [userId], references: [id])
+  id            Int                @id @default(autoincrement())
+  tanggal       DateTime           @default(now())
+  total         Decimal            @db.Decimal(10, 2)
+  paymentMethod Payment            @default(QRIS)
+  orderName     String             @default("")
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  User          User?              @relation(fields: [userId], references: [id])
   userId        Int?
   detail        Detail_Transaksi[]
-}                        
+}
 
 model Detail_Transaksi {
   id             Int        @id @default(autoincrement())
@@ -75,7 +75,7 @@ model Detail_Transaksi {
   purchase_price Int
   createdAt      DateTime   @default(now())
   updateAt       DateTime   @updatedAt
-  Menu           Menu?      @relation(fields: [menuId], references: [id_menu  ])
+  Menu           Menu?      @relation(fields: [menuId], references: [id_menu])
   menuId         Int?
   transaksiId    Int?
   transaksi      Transaksi? @relation(fields: [transaksiId], references: [id])

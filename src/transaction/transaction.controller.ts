@@ -4,6 +4,8 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { RoleGuard, Roles } from 'src/helper/roles-guard';
+import { FindTransactionDto } from './dto/find-transaction.dto';
+import { Query } from '@nestjs/common';
 
 @Controller('transaction')
 export class TransactionController {
@@ -17,8 +19,8 @@ export class TransactionController {
    @Get()
  @UseGuards(AuthGuard('jwt'), RoleGuard)
  @Roles('ADMIN')
- findAll() {
-   return this.transactionService.findAll();
+ findAll(@Query()findTransactionDto: FindTransactionDto) {
+   return this.transactionService.findAll(findTransactionDto);
  }
 
    @Get(':id')

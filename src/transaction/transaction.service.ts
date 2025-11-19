@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { PrismaService } from 'src/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { FindTransactionDto } from './dto/find-transaction.dto';
+import { Transaction } from './entities/transaction.entity';
 
 
 @Injectable()
@@ -59,9 +61,35 @@ export class TransactionService {
         }
       }
 
-    async findAll() {
+    async findAll(findTransactionDto: FindTransactionDto) {
        try {
-           return this.prisma.transaksi.findMany({
+            const { page = 1, limit = 10, startDate, endDate } = findTransactionDto;
+            const skip = (page - 1) * limit;
+
+            const where: any = {} ;
+            //filter by date range
+            if (startDate || endDate) {
+                where.createdAt = {};
+                if (startDate) {
+                    const start = new Date(startDate);
+                    if(!isNaN(start.getTime())) {
+                        where.createdAt.gte = start;
+                    }
+                }
+                if (endDate) {
+                    const end = new Date(endDate);
+                    if (!isNaN(end.getTime())) {
+                        //set jam akhir: 23:59:59
+                        end.setHours(23, 59, 59, 999);
+                        where.createdAt.lte = end;
+                    }
+                }
+            }
+            
+           const Transaksi = await this.prisma.transaksi.findMany({
+               where,
+               skip: skip,
+               take: Number(limit), 
                include: {
                    detail: {
                        include: {
@@ -73,6 +101,20 @@ export class TransactionService {
                    createdAt: 'desc'
                }
            });
+           const total = await this.prisma.transaksi.count({ where });
+
+           return {
+            success: true,
+            message: 'transaction data found successfully',
+            data: Transaction,
+            meta: {
+                total,
+                page: Number(page),
+                limit: Number(limit),
+                totalPages: Math.ceil(total/ limit),
+            },
+
+           };
        } catch (error) {
            return {
                success: false,

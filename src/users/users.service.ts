@@ -3,6 +3,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma.service'; 
 import { BcryptService } from 'src/bcrypt/bcrypt.service';
+import { FindUserDto } from './dto/find-user.dto';
+
 
 @Injectable()
 export class UsersService {
@@ -37,15 +39,40 @@ export class UsersService {
     }
   }
 
-async findAll() {
+async findAll(findUserDto: FindUserDto) {
     try {
+      const { search = "", role, page = 1, limit = 10, } = findUserDto;
+      const skip = (page - 1) * limit;
+
+      const where: any = {};
+      //searching by name
+      if (search) {
+        where.name = {
+          contains: search
+        };
+      }
+      //filter by role
+      if(role){
+        where.role = role;
+      }
+
       const user = await this.prisma.user.findMany({
+        where,
+        skip: skip,
+        take: Number(limit),
       })
+      const total = await this.prisma.user.count({ where });
 
       return {
         success: true,
         message: "user data found successfully",
-        data: user
+        data: user,
+        meta: {
+          total, 
+          page: Number(page),
+          limit: Number(limit),
+          totalPages: Math.ceil(total / limit),
+        },
       }
     } catch (error) {
       return {
@@ -70,7 +97,7 @@ async findAll() {
       })
     if (!findUser){
       return{
-        succes: false,
+        success: false,
         message: `User does not exists`,
         data: null
       }

@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, UploadedFile } from '@nestjs/common';
 import { MenuService } from './menu.service';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
 import { RoleGuard, Roles } from 'src/helper/roles-guard';
-import { AuthGuard } from '@nestjs/passport'; // ← tambahin ini
+import { AuthGuard } from '@nestjs/passport'; 
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('menu')
 export class MenuController {
@@ -12,8 +13,9 @@ export class MenuController {
   @Post()
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Roles('ADMIN')
-  create(@Body() createMenuDto: CreateMenuDto) {
-    return this.menuService.create(createMenuDto);
+  create(@Body() createMenuDto: CreateMenuDto,@UploadedFile() fileImage: Express.Multer.File) 
+  {
+    return this.menuService.create(createMenuDto, fileImage);
   }
 
   @Get()

@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, Put, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, Put, UseGuards, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RoleGuard, Roles } from 'src/helper/roles-guard';
 import { AuthGuard } from '@nestjs/passport';
+import { FindUserDto } from './dto/find-user.dto';
 //terminal: npx nest g resource menu
 @Controller('users')
 export class UsersController {
@@ -18,8 +19,8 @@ export class UsersController {
   @Get()
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Roles('ADMIN')
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() findUserDto: FindUserDto) {
+    return this.usersService.findAll(findUserDto);
   }
 
   @Get(':id')

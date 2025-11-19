@@ -2,21 +2,32 @@ import { Injectable } from '@nestjs/common';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
 import { PrismaService } from 'src/prisma.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class MenuService {
  constructor(
-  private prisma: PrismaService
+  private prisma: PrismaService,
+  private cloudinaryService: CloudinaryService
  ) {}
- async create(createMenuDto: CreateMenuDto) {
+ async create(createMenuDto: CreateMenuDto, fileImage: Express.Multer.File) {
   try {
     const { name, price, kategori, deskripsi } = createMenuDto;
+    if(!fileImage){
+      return {
+        success: false,
+        message: "Image file is required",
+        data: null
+      }
+    }
+    const uploadFile = await this.cloudinaryService.uploadfile(fileImage, 'menu_images');
     const createMenu = await this.prisma.menu.create({
       data: {
         nama: name,
         harga: Number(price),
         kategori,
-        deskripsi
+        deskripsi,
+        fileImage: uploadFile?.secure_url || ''
       }
     })
     return {
